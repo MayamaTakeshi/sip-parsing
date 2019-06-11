@@ -1,4 +1,4 @@
-const sip_compact_headers = require('./sip_compact_headers')
+const compact_headers = require('./compact_headers')
 
 const _ = require('lodash')
 
@@ -38,8 +38,8 @@ const basic_parse = (msg) => {
 	msg.headers = _.map(header_lines, line => {
 		var colon_pos = line.indexOf(":")
 		var name = line.substring(0,colon_pos).trim().toLowerCase()
-		if(sip_compact_headers[name]) {
-			name = sip_compact_headers[name]
+		if(compact_headers[name]) {
+			name = compact_headers[name]
 		}
 		var value = line.substring(colon_pos+1).trim()
 		return [name, value]
@@ -68,7 +68,7 @@ const get_header_by_index = (name, index, msg) => {
 
 const remove_angle_brackets = uri => {
 	if(uri[0] == "<" && uri[uri.length - 1] == ">") {
-		return uri[1, uri.length - 1]
+		return uri.substring(1, uri.length - 1)
 	}
 	return uri
 }
@@ -78,16 +78,16 @@ const parse_displayname_and_uri = (displayname_uri) => {
 
 	var double_quote_pos = displayname_uri.indexOf('"')
 
-	if(double_quote_pos > 0) {
+	if(double_quote_pos >= 0) {
 		var closing_double_quote_pos = displayname_uri.indexOf('"', double_quote_pos+1)
-		if(closing_double_quote_pos > 0) {
+		if(closing_double_quote_pos >= 0) {
 			separation_point = closing_double_quote_pos
 		}
 	}
 
 	if(!separation_point) {
 		var space_pos = displayname_uri.indexOf(" ")
-		if(space_pos > 0) {
+		if(space_pos >= 0) {
 			separation_point = space_pos
 		} else {
 			var open_bracket_pos = displayname_uri.indexOf("<")
@@ -100,9 +100,9 @@ const parse_displayname_and_uri = (displayname_uri) => {
 	var displayname
 	var uri
 
-	if(separation_point) {
-		displayname = displayname_uri[0, separation_point].trim()
-		uri = displayname_uri.substring(separation_point+1)
+	if(separation_point > 0) {
+		displayname = displayname_uri.substring(0, separation_point).trim()
+		uri = displayname_uri.substring(separation_point+1).trim()
 	} else {
 		displayname = ""
 		uri = displayname_uri.trim()
@@ -202,13 +202,13 @@ const base_pseudovar_accessors = {
 
 	$rb: (msg) => { return msg.body },
 
-	$ua: (msg) => { return msg.headers['user-agent'] },
+	$ua: (msg) => { return get_header('user-agent', msg) },
 
-	$ci: (msg) => { return msg.headers['call-id'] },
+	$ci: (msg) => { return get_header('call-id', msg) },
 
-	$cl: (msg) => { return msg.headers['content-length'] },
+	$cl: (msg) => { return get_header('content-length', msg) },
 
-	$cT: (msg) => { return msg.headers['content-type'] },
+	$cT: (msg) => { return get_header('content-type', msg) },
 }
 
 const get_hdr = (spec, msg) => {
@@ -239,14 +239,14 @@ const get_hdr_with_index = (spec, msg) => {
 }
 
 module.exports = {
-	gen_parser: (msg_payload) => {
+	parse: (msg_payload) => {
 		var msg = {
 			str: msg_payload
 		}
 
 		basic_parse(msg)
 		
-		var parser = new Proxy(msg, {
+		var o = new Proxy(msg, {
 			get: function (target, key, receiver) {
 				if (target.hasOwnProperty(key)){
 					return Reflect.get(target, key, receiver);
@@ -256,22 +256,47 @@ module.exports = {
 					return base_pseudovar_accessors[key](target)
 				}
 
+				var key = key.toString()
+
 				var match = null
 
 				var re_hdr = /^\$hdr\(([^\)]+)\)$/
-				match = key.toString().match(re_hdr)
+				match = key.match(re_hdr)
 				if(match) {
 					var name = match[1]
+					if(compact_headers[name]) {
+						name = compact_headers[name]
+					}
+
 					target[key] = get_header(name, target) 
 					return target[key]
 				}
 
 				var re_hdr_with_index = /^\$\(hdr\(([^\)]+)\)\[([0-9]+)\]\)$/
-				match = key.toString().match(re_hdr_with_index)
+				match = key.match(re_hdr_with_index)
 				if(match) {
 					var name = match[1]
+					if(compact_headers[name]) {
+						name = compact_headers[name]
+					}
+
 					var index = parseInt(match[2])
 					target[key] = get_header_by_index(name, index, target) 
+					return target[key]
+				}
+
+				var re_hdrcnt = /^\$\(hdrcnt\(([^\)]+)\)\)$/
+				match = key.match(re_hdrcnt)
+				if(match) {
+					var name = match[1].toLowerCase()
+					if(compact_headers[name]) {
+						name = compact_headers[name]
+					}
+
+					target[key] = _.reduce(target.headers, (acc, a) => {
+						if(a[0] == name) return acc + 1
+						return acc
+					}, 0)
 					return target[key]
 				}
 
@@ -279,7 +304,7 @@ module.exports = {
 			},
 		})
 
-		return parser
+		return o
 	},
 }
 
