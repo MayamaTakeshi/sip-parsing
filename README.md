@@ -26,7 +26,7 @@ a=sendrecv`
 
 s = s.replace(/\n/g, "\r\n")
 
-var msg = sp.parse(s)
+var msg = sip_parsing.parse(s)
 
 assert(msg.$rU == "bob")
 assert(msg.$ru == "sip:bob@biloxi.com")
