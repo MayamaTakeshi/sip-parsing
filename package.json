@@ -1,6 +1,6 @@
 {
   "name": "sip-parsing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "author": "MayamaTakeshi",
   "repository": "https://MayamaTakeshi@github.com/MayamaTakeshi/sip-parsing",
@@ -8,6 +8,15 @@
   "scripts": {
     "test": "jest --verbose ./tests"
   },
+  "keywords": [
+    "sip",
+    "parse",
+    "parsing",
+    "opensips",
+    "kamailio",
+    "openser",
+    "syntax"
+  ],
   "devDependencies": {
     "jest": "^24.8.0"
   },

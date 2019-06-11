@@ -196,7 +196,7 @@ const base_pseudovar_accessors = {
 
 	$di: (msg) => { parse_displayname_uri_username_domain("diversion", msg); return msg.$di },
 
-	$re: (msg) => { parse_displayname_uri_username_domain("pemote-party-id", msg); return msg.$re },
+	$re: (msg) => { parse_displayname_uri_username_domain("remote-party-id", msg); return msg.$re },
 
 	$rt: (msg) => { parse_displayname_uri_username_domain("refer-to", msg); return msg.$rt },
 
