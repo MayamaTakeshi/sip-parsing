@@ -1,6 +1,6 @@
 {
   "name": "sip-parsing",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "index.js",
   "author": "MayamaTakeshi",
   "repository": "https://MayamaTakeshi@github.com/MayamaTakeshi/sip-parsing",
