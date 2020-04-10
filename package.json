@@ -1,6 +1,6 @@
 {
   "name": "sip-parsing",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "index.js",
   "author": "MayamaTakeshi",
   "repository": "https://MayamaTakeshi@github.com/MayamaTakeshi/sip-parsing",
@@ -18,7 +18,7 @@
     "syntax"
   ],
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^25.3.0"
   },
   "dependencies": {
     "lodash": "^4.17.14"
