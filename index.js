@@ -57,11 +57,28 @@ const get_header = (name, msg) => {
 }
 
 const get_header_by_index = (name, index, msg) => {
-	var item = _.filter(msg.headers, name_value => {
+	var items = _.filter(msg.headers, name_value => {
 		return name.toLowerCase() == name_value[0]
-	})[index]
+	})
 
-	if(item) return item[1]
+	if(items.length == 0) return null
+
+	var item = null
+	
+	if(index == '-1') {
+		item = items[items.length -1]
+		if(item) return item[1]
+	} else if(index == '*') {
+		return _.chain(items).map(item => {
+			return item[1]
+		}).join(",").value()
+	} else {
+		index = parseInt(index)
+		if(Number.isInteger(index) && index >= 0) {
+			item = items[index]
+			if(item) return item[1]
+		}
+	}	
 
 	return null
 }
@@ -211,6 +228,7 @@ const base_pseudovar_accessors = {
 	$cT: (msg) => { return get_header('content-type', msg) },
 }
 
+/*
 const get_hdr = (spec, msg) => {
 	// if hdr is like $hdr(header_name), then get the specified header	
 
@@ -224,19 +242,22 @@ const get_hdr = (spec, msg) => {
 	return null
 }
 
+
 const get_hdr_with_index = (spec, msg) => {
 	// if hdr is like $(hdr(header_name)[index]), then get the specified header at that index
 
-	var re = /^\$\(hdr\(([^\)]+)\)\[([0-9]+)\]\)$/
+	var re = /^\$\(hdr\(([^\)]+)\)\[(-*[0-9]+)\]\)$/
 
 	var m = spec.match(re)
 	if(m && m[1] && m[2]) {
 		var name = m[1]
-		var index = parseInt(m[2])
+		//var index = parseInt(m[2])
+		index = m[2]
 		return get_header_by_index(name, index, msg) 
 	}
 	return null
 }
+*/
 
 module.exports = {
 	parse: (msg_payload) => {
@@ -272,7 +293,7 @@ module.exports = {
 					return target[key]
 				}
 
-				var re_hdr_with_index = /^\$\(hdr\(([^\)]+)\)\[([0-9]+)\]\)$/
+				var re_hdr_with_index = /^\$\(hdr\(([^\)]+)\)\[(-1|[0-9]+|\*)\]\)$/
 				match = key.match(re_hdr_with_index)
 				if(match) {
 					var name = match[1]
@@ -280,7 +301,8 @@ module.exports = {
 						name = compact_headers[name]
 					}
 
-					var index = parseInt(match[2])
+					//var index = parseInt(match[2])
+					var index = match[2]
 					target[key] = get_header_by_index(name, index, target) 
 					return target[key]
 				}
