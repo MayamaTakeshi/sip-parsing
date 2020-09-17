@@ -15,9 +15,10 @@ const parse_request_line = (msg) => {
 }
 
 const parse_status_line = (msg) => {
-	var a = msg.first_line.split(/\s+/)
-	msg['$rs'] = a[1]
-	msg['$rr'] = a[2]
+	var a = msg.first_line.split(/ (.+)/)
+	var b = a[1].trim().split(/ (.+)/)
+	msg['$rs'] = b[0].trim()
+	msg['$rr'] = b[1].trim()
 }
 
 const basic_parse = (msg) => {

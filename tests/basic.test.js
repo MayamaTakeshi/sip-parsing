@@ -9,7 +9,7 @@ To: Bob <sip:bob@biloxi.com>
 From: Alice <sip:alice@atlanta.com>;tag=1928301774
 Call-ID: a84b4c76e66710
 CSeq: 314159 INVITE
-USER-AGENT: SomeUA
+USER-AGENT: SomeUA 123.0
 Contact: <sip:alice@pc33.atlanta.com>
 Content-Type: application/sdp
 cONTENT-lENGTH: 142
@@ -34,7 +34,7 @@ a=sendrecv`
 	expect(p['$(hdr(v)[-1])']).toBe('SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1')
 	expect(p['$(hdr(v)[*])']).toBe(p['$(hdr(v)[0])'] + ',' + p['$(hdr(v)[1])'])
 	expect(p['$(hdr(v)[3])']).toBe(null)
-	expect(p.$ua).toBe('SomeUA')
+	expect(p.$ua).toBe('SomeUA 123.0')
 	expect(p.$ci).toBe('a84b4c76e66710')
 	expect(p.$cT).toBe('application/sdp')
 	expect(p.$cl).toBe('142')
@@ -43,7 +43,7 @@ a=sendrecv`
 
 
 test('response', () => {
-	var s = `SIP/2.0 180 Ringing
+	var s = `SIP/2.0    180    I'm coming
 Via: SIP/2.0/UDP server10.biloxi.com;branch=z9hG4bK4b43c2ff8.1;received=192.0.2.3
 Via: SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1;received=192.0.2.2
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1
@@ -61,7 +61,7 @@ Content-Length: 0
 	var p = sp.parse(s)
 
 	expect(p.$rs).toBe("180")
-	expect(p.$rr).toBe("Ringing")
+	expect(p.$rr).toBe("I'm coming")
 	expect(p.$fU).toBe("alice")
 	expect(p.$fn).toBe('Alice')
 	expect(p.$tU).toBe("bob")
@@ -84,7 +84,7 @@ i: a84b4c76e66710
 CSeq: 314159 INVITE
 USER-AGENT: SomeUA
 m: <sip:alice@pc33.atlanta.com>
-c: application/sdp
+c:    application/sdp
 l: 142
 
 [Alice's SDP not shown]`
