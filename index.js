@@ -187,36 +187,63 @@ const parse_displayname_uri_username_domain = (header, msg) => {
 	return {displayname: du.display_name, uri: du.uri, username: udp.username, domain: udp.domain}
 }
 
+const parse_cseq = (msg) => {
+    var cseq = get_header('cseq', msg)
+    if(!cseq) return null
+
+    cseq = cseq.trim().split(/\W+/)
+
+    var seq = parseInt(cseq[0])
+    
+    msg.$cs = seq
+    return seq
+}
+
+const get = (msg, parser, key) => {
+    if(msg.hasOwnProperty(key)) return msg[key]
+
+    parser(msg)
+    return msg[key]
+}
+
+const partial = (fu, name) => {
+    return (msg) => {
+        return fu(name, msg)
+    }
+}
+
 const base_pseudovar_accessors = {
-	$rm: (msg) => { parse_request_line(msg); return msg.$rm },
-	$ru: (msg) => { parse_request_line(msg); return msg.$ru },
-	$rU: (msg) => { parse_request_line(msg); return msg.$rU },
-	$rd: (msg) => { parse_request_line(msg); return msg.$rd },
-	$rp: (msg) => { parse_request_line(msg); return msg.$rp },
+	$rm: (msg) => { return get(msg, parse_request_line, '$rm') },
+	$ru: (msg) => { return get(msg, parse_request_line, '$ru') },
+	$rU: (msg) => { return get(msg, parse_request_line, '$rU') },
+	$rd: (msg) => { return get(msg, parse_request_line, '$rd') },
+	$rp: (msg) => { return get(msg, parse_request_line, '$rp') },
 
-	$rs: (msg) => { parse_status_line(msg); return msg.$rs },
-	$rr: (msg) => { parse_status_line(msg); return msg.$rr },
+	$rs: (msg) => { return get(msg, parse_status_line, '$rs') },
+	$rr: (msg) => { return get(msg, parse_status_line, '$rr') },
 
-	$fn: (msg) => { parse_displayname_uri_username_domain("from", msg); return msg.$fn },
-	$fu: (msg) => { parse_displayname_uri_username_domain("from", msg); return msg.$fu },
-	$fU: (msg) => { parse_displayname_uri_username_domain("from", msg); return msg.$fU },
-	$fd: (msg) => { parse_displayname_uri_username_domain("from", msg); return msg.$fd },
+	$fn: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fn') },
+	$fu: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fu') },
+	$fU: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fU') },
+	$fd: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fd') },
 
-	$tn: (msg) => { parse_displayname_uri_username_domain("to", msg); return msg.$tn },
-	$tu: (msg) => { parse_displayname_uri_username_domain("to", msg); return msg.$tu },
-	$tU: (msg) => { parse_displayname_uri_username_domain("to", msg); return msg.$tU },
-	$td: (msg) => { parse_displayname_uri_username_domain("to", msg); return msg.$td },
+	$tn: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "to"), '$tn') },
+	$tu: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "to"), '$tu') },
+	$tU: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "to"), '$tU') },
+	$td: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "to"), '$td') },
 
-	$pn: (msg) => { parse_displayname_uri_username_domain("p-preferred-identity", msg); return msg.$pn }, 
-	$pu: (msg) => { parse_displayname_uri_username_domain("p-preferred-identity", msg); return msg.$pu },
-	$pU: (msg) => { parse_displayname_uri_username_domain("p-preferred-identity", msg); return msg.$pU },
-	$pd: (msg) => { parse_displayname_uri_username_domain("p-preferred-identity", msg); return msg.$pd },
+	$pn: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "p-preferred-identity"), '$pn') }, 
+	$pu: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "p-preferred-identity"), '$pu') },
+	$pU: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "p-preferred-identity"), '$pU') },
+	$pd: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "p-preferred-identity"), '$pd') },
 
-	$di: (msg) => { parse_displayname_uri_username_domain("diversion", msg); return msg.$di },
+	$di: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "diversion"), '$di') },
 
-	$re: (msg) => { parse_displayname_uri_username_domain("remote-party-id", msg); return msg.$re },
+	$re: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "remote-party-id"), '$re') },
 
-	$rt: (msg) => { parse_displayname_uri_username_domain("refer-to", msg); return msg.$rt },
+	$rt: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "refer-to"), '$rt') },
+
+    $cs: (msg) => { return get(msg, parse_cseq, '$cs') },
 
 	$rb: (msg) => { return msg.body },
 
@@ -226,44 +253,15 @@ const base_pseudovar_accessors = {
 
 	$cl: (msg) => { return get_header('content-length', msg) },
 
+
 	$cT: (msg) => { return get_header('content-type', msg) },
 }
 
-/*
-const get_hdr = (spec, msg) => {
-	// if hdr is like $hdr(header_name), then get the specified header	
-
-	var re = /^\$hdr\(([^\)]+)\)$/
-
-	var name = spec.match(re)[1]
-
-	if(name) {
-		return get_header(name, msg) 
-	}
-	return null
-}
-
-
-const get_hdr_with_index = (spec, msg) => {
-	// if hdr is like $(hdr(header_name)[index]), then get the specified header at that index
-
-	var re = /^\$\(hdr\(([^\)]+)\)\[(-*[0-9]+)\]\)$/
-
-	var m = spec.match(re)
-	if(m && m[1] && m[2]) {
-		var name = m[1]
-		//var index = parseInt(m[2])
-		index = m[2]
-		return get_header_by_index(name, index, msg) 
-	}
-	return null
-}
-*/
 
 module.exports = {
 	parse: (msg_payload) => {
 		var msg = {
-			str: msg_payload
+			str: msg_payload,
 		}
 
 		basic_parse(msg)

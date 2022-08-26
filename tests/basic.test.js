@@ -34,6 +34,7 @@ a=sendrecv`
 	expect(p['$(hdr(v)[-1])']).toBe('SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1')
 	expect(p['$(hdr(v)[*])']).toBe(p['$(hdr(v)[0])'] + ',' + p['$(hdr(v)[1])'])
 	expect(p['$(hdr(v)[3])']).toBe(null)
+    expect(p.$cs).toBe(314159)
 	expect(p.$ua).toBe('SomeUA 123.0')
 	expect(p.$ci).toBe('a84b4c76e66710')
 	expect(p.$cT).toBe('application/sdp')
