@@ -40,6 +40,9 @@ a=sendrecv`
 	expect(p.$cT).toBe('application/sdp')
 	expect(p.$cl).toBe('142')
 	expect(p.$rb).toBe('v=0\r\no=root 123 456 IN IP4 1.2.3.4\r\na=rtpmap:0 pcmu/8000\r\na=sendrecv')
+
+    expect(p.$rs).toBe(null)
+    expect(p.$rr).toBe(null)
 })
 
 
@@ -71,6 +74,9 @@ Content-Length: 0
 	expect(p['$hdr(v)']).toBe('SIP/2.0/UDP server10.biloxi.com;branch=z9hG4bK4b43c2ff8.1;received=192.0.2.3')
 	expect(p.$ua).toBe('SuperSIP')
 	expect(p.$cl).toBe('0')
+
+    expect(p.$cs).toBe(314159)
+    expect(p.$rm).toBe('INVITE')
 })
 
 

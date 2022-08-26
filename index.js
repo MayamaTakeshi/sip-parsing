@@ -22,6 +22,8 @@ const parse_status_line = (msg) => {
 }
 
 const basic_parse = (msg) => {
+    msg.is_request = !msg.str.startsWith('SIP/2.0')
+
 	var a = msg.str.split("\r\n\r\n")
 
 	if(a[1] == "") {
@@ -194,9 +196,11 @@ const parse_cseq = (msg) => {
     cseq = cseq.trim().split(/\W+/)
 
     var seq = parseInt(cseq[0])
-    
     msg.$cs = seq
-    return seq
+
+    if(!msg.$rm) {
+        msg.$rm = cseq[1]
+    }
 }
 
 const get = (msg, parser, key) => {
@@ -212,15 +216,33 @@ const partial = (fu, name) => {
     }
 }
 
+const request_method = (msg) => {
+    if(msg.is_request) {
+        parse_request_line(msg)
+    } else {
+        parse_cseq(msg)
+    }
+}
+
+const status_or_reason = (msg) => {
+    if(msg.is_request) {
+        msg.$rs = null
+        msg.$rr = null
+        return
+    }
+
+    parse_status_line(msg)
+}
+
 const base_pseudovar_accessors = {
-	$rm: (msg) => { return get(msg, parse_request_line, '$rm') },
+	$rm: (msg) => { return get(msg, request_method, '$rm') },
 	$ru: (msg) => { return get(msg, parse_request_line, '$ru') },
 	$rU: (msg) => { return get(msg, parse_request_line, '$rU') },
 	$rd: (msg) => { return get(msg, parse_request_line, '$rd') },
 	$rp: (msg) => { return get(msg, parse_request_line, '$rp') },
 
-	$rs: (msg) => { return get(msg, parse_status_line, '$rs') },
-	$rr: (msg) => { return get(msg, parse_status_line, '$rr') },
+	$rs: (msg) => { return get(msg, status_or_reason, '$rs') },
+	$rr: (msg) => { return get(msg, status_or_reason, '$rr') },
 
 	$fn: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fn') },
 	$fu: (msg) => { return get(msg, partial(parse_displayname_uri_username_domain, "from"), '$fu') },
