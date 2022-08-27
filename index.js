@@ -36,6 +36,8 @@ const parse_status_line = (msg) => {
 const basic_parse = (msg) => {
     msg.is_request = !msg.str.startsWith('SIP/')
     msg.$ml = msg.str.length
+    msg.['$msg.is_request'] = msg.is_request ? 1 : 0
+    msg.['$msg.type'] = msg.is_request ? 'request' : 'reply'
 
     var a = msg.str.split("\r\n\r\n")
 
@@ -223,6 +225,7 @@ const parse_displayname_uri_username_domain = (header, msg) => {
         msg.$tn = du.displayname
         msg.$tU = sudp.username
         msg.$td = sudp.domain
+        msg.$tt = du.params.tag
     } else if(header == 'p-preferred-identity') {
         msg.$pu = du.uri
         msg.$pn = du.displayname
@@ -232,6 +235,8 @@ const parse_displayname_uri_username_domain = (header, msg) => {
         msg.$ai = du.uri
     } else if(header == 'diversion') {
         msg.$di = du.uri
+        msg.$dip = du.params.privacy
+        msg.$dir = du.params.reason
     } else if(header == 'remote-party-id') {
         msg.$re = du.uri
     } else if(header == 'refer-to') {
@@ -283,6 +288,12 @@ const parse_authorization_or_proxy_authorization = (msg) => {
     msg.$au  = ensure_null(user_and_domain[0])
     msg.$ad  = ensure_null(user_and_domain[1])
     msg.$aU  = ensure_null(msg.auth.username)
+    msg.$an  = ensure_null(msg.auth.nonce)
+    msg['$auth.nonce'] = msg.$an
+    msg['$auth.resp'] = ensure_null(msg.auth.response)
+    msg['$auth.opaque'] = ensure_null(msg.auth.opaque)
+    msg['$auth.alg'] = msg.$aa
+    msg['$auth.qop'] = ensure_null(msg.auth.qop)
 }
 
 
@@ -322,6 +333,7 @@ const base_pseudovar_accessors = {
     $tu: (msg) => { return get(msg, parse_to, '$tu') },
     $tU: (msg) => { return get(msg, parse_to, '$tU') },
     $td: (msg) => { return get(msg, parse_to, '$td') },
+    $tt: (msg) => { return get(msg, parse_to, '$tt') },
 
     $pn: (msg) => { return get(msg, parse_ppi, '$pn') }, 
     $pu: (msg) => { return get(msg, parse_ppi, '$pu') },
@@ -334,10 +346,19 @@ const base_pseudovar_accessors = {
     $au : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$au') },
     $ad : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$ad') },
     $aU : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$aU') },
+    $an : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$an') },
+
+    '$auth.nonce'  : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.nonce') },
+    '$auth.resp'   : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.resp') },
+    '$auth.opaque' : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.opaque') },
+    '$auth.alg'    : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.alg') },
+    '$auth.qop'    : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.qop') },
 
     $ai: (msg) => { return get(msg, parse_pai, '$ai') },
 
     $di: (msg) => { return get(msg, parse_diversion, '$di') },
+    $dip: (msg) => { return get(msg, parse_diversion, '$dip') },
+    $dir: (msg) => { return get(msg, parse_diversion, '$dir') },
 
     $re: (msg) => { return get(msg, parse_rpi, '$re') },
 

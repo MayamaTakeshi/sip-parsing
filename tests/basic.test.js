@@ -35,6 +35,12 @@ Content-Length:  0
     expect(p.$ar).toBe("philolaus")
     expect(p.$au).toBe("alice")
     expect(p.$ad).toBe(null)
+    expect(p.$an).toBe('YwlawmMJWZYy5SvWK0BKihxsDkQusC+y')
+    expect(p['$auth.resp']).toBe('3a3095e91d9e8c2dcabef86695efd5')
+    expect(p['$auth.nonce']).toBe('YwlawmMJWZYy5SvWK0BKihxsDkQusC+y')
+    expect(p['$auth.opaque']).toBe(null)
+    expect(p['$auth.alg']).toBe("MD5-sess")
+    expect(p['$auth.qop']).toBe(null)
     expect(p.$aU).toBe("alice")
     expect(p.$rv).toBe('SIP/2.0')
     expect(p.$rs).toBe(null)
@@ -53,9 +59,10 @@ CSeq: 314159 INVITE
 USER-AGENT: SomeUA 123.0
 Contact: <sip:alice@pc33.atlanta.com>
 Content-Type: application/sdp
-Proxy-Authorization: Digest username="alice@atlanta.com", realm="trapezoid", nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", uri="sip:0011223344@biloxi.com", response="3a3095e91d9e8c2dcabef86695efd5"
+Proxy-Authorization: Digest username="alice@atlanta.com", realm="trapezoid", algorithm="MD5", opaque="someopaque", qop="someqop", nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", uri="sip:0011223344@biloxi.com", response="3a3095e91d9e8c2dcabef86695efd5"
 Route: <sip:192.168.2.198:9060;lr;r2=on;ftag=2d20cea8;did=a57.05>
 Route: <sip:192.168.2.198;lr;r2=on;ftag=2d20cea8-527ddsf;did=a57.05>
+Diversion: sip:11223344@test.com;reason=user-busy;counter=1;privacy=full
 cONTENT-lENGTH: 142
 
 v=0
@@ -87,11 +94,19 @@ a=sendrecv`
 	expect(p.$cl).toBe('142')
 	expect(p.$rb).toBe('v=0\r\no=root 123 456 IN IP4 1.2.3.4\r\na=rtpmap:0 pcmu/8000\r\na=sendrecv')
     expect(p.$adu).toBe('sip:0011223344@biloxi.com')
-    expect(p.$aa).toBe(null)
+    expect(p.$aa).toBe('MD5')
     expect(p.$ar).toBe("trapezoid")
     expect(p.$au).toBe("alice")
     expect(p.$ad).toBe("atlanta.com")
     expect(p.$aU).toBe("alice@atlanta.com")
+    expect(p['$auth.resp']).toBe('3a3095e91d9e8c2dcabef86695efd5')
+    expect(p['$auth.nonce']).toBe('YwlawmMJWZYy5SvWK0BKihxsDkQusC+y')
+    expect(p['$auth.opaque']).toBe('someopaque')
+    expect(p['$auth.alg']).toBe("MD5")
+    expect(p['$auth.qop']).toBe('someqop')
+    expect(p.$di).toBe('sip:11223344@test.com')
+    expect(p.$dip).toBe('full')
+    expect(p.$dir).toBe('user-busy')
     expect(p.$rv).toBe('SIP/2.0')
     expect(p.$rs).toBe(null)
     expect(p.$rr).toBe(null)
@@ -187,6 +202,7 @@ Content-Type: application/sdp
 P-Asserted-Identity: <sip:12345227101@sip.domain.de;user=phone>
 P-Preferred-Identity: <sip:123452270@sip.domain.de:5060>
 Route: <sip:192.168.2.198;lr;r2=on;ftag=2d20cea8-527ddsf;did=a57.05>
+Diversion: <sip:11223344@test.com>;reason=user-busy;counter=1;privacy=full
 content-length: 142
 
 v=0
@@ -206,5 +222,8 @@ a=sendrecv`
 	expect(p.$pd).toBe("sip.domain.de")
 	expect(p.$pu).toBe("sip:123452270@sip.domain.de:5060")
 	expect(p.$ai).toBe("sip:12345227101@sip.domain.de")
+    expect(p.$di).toBe('sip:11223344@test.com')
+    expect(p.$dip).toBe('full')
+    expect(p.$dir).toBe('user-busy')
 })
 
