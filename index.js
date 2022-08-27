@@ -288,6 +288,7 @@ const parse_authorization_or_proxy_authorization = (msg) => {
     msg['$auth.opaque'] = msg.auth.opaque
     msg['$auth.alg'] = msg.$aa
     msg['$auth.qop'] = msg.auth.qop
+    msg['$auth.nc'] = msg.auth.nc
 }
 
 
@@ -347,6 +348,7 @@ const base_pseudovar_accessors = {
     '$auth.opaque' : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.opaque') },
     '$auth.alg'    : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.alg') },
     '$auth.qop'    : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.qop') },
+    '$auth.nc'     : (msg) => { return get(msg, parse_authorization_or_proxy_authorization, '$auth.nc') },
 
     $ai: (msg) => { return get(msg, parse_pai, '$ai') },
 

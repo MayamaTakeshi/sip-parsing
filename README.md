@@ -74,12 +74,6 @@ Here is the full list of supported pseudo-variables:
     $aU : header Authorization or Proxy-Authorization username
     $an : header Authorization or Proxy-Authorization nonce
 
-    '$auth.nonce'  : header Authorization or Proxy-Authorization nonce
-    '$auth.resp'   : header Authorization or Proxy-Authorization response
-    '$auth.opaque' : header Authorization or Proxy-Authorization opaque
-    '$auth.alg'    : header Authorization or Proxy-Authorization algorithm
-    '$auth.qop'    : header Authorization or Proxy-Authorization qop
-
     $ai : header P-Asserted-Identity URI
 
     $di  : header Diversion URI
@@ -101,17 +95,25 @@ Here is the full list of supported pseudo-variables:
 
     $cT : header Content-Type
 
-    $route_uri: first Route header URI
-
     $ml : msg length
+
     $mt : msg type 1 (request) or 2 (reply)
+
+    $route_uri: first Route header URI
 
     '$msg.is_request' : 1 (true) or 0 (false)
     '$msg.type' : 'request' or 'reply'
- 
+
+    '$auth.nonce'  : header Authorization or Proxy-Authorization nonce
+    '$auth.resp'   : header Authorization or Proxy-Authorization response
+    '$auth.opaque' : header Authorization or Proxy-Authorization opaque
+    '$auth.alg'    : header Authorization or Proxy-Authorization algorithm
+    '$auth.qop'    : header Authorization or Proxy-Authorization qop
 ```
 
-Also we support these special pseudo-variables defined by opensips/kamailio:
+Obs: some pseudo-variables are redundant but this is because we combined the pseudo-variables provided by openser/opensips/kamailio.
+
+Also we support these special pseudo-variables defined by kamailio/opensips:
 ```
   '$(hdrcnt(HEADER_NAME))' : number of header with that name in the msg
   '$hdr(HEADER_NAME)' : gets the first header with HEADER_NAME in the msg
@@ -134,8 +136,6 @@ Obs: you must replace dashes in the header names with underscores.
 
 A few pseudo-variables are currently not supported (as I need more details to implement them):
 ```
-$auth.nc - the value of nonce count parameter from Authorization or Proxy-Authorization header
-
 $(rb[*]) - same as $rb
 
 $(rb[n]) - the n-th body belonging to a multi-part body from the beginning of message, starting with index 0
