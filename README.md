@@ -42,3 +42,116 @@ assert(msg.$cl == '142')
 assert(msg.$rb == 'v=0\r\no=root 123 456 IN IP4 1.2.3.4\r\na=rtpmap:0 pcmu/8000\r\na=sendrecv')
 
 ```
+
+Here is the full list of supported pseudo-variables:
+
+```
+    $rm : request method ('INVITE', 'ACK', 'BYE' etc)
+
+    $fn  : header From DisplayName
+    $fu  : header From URI
+    $fU  : header From UserName
+    $fd  : header From Domain
+    $ft: : header From parameter tag
+    $fUl : header From UserName length
+
+    $tn : header To DisplayName
+    $tu : header To URI
+    $tU : header To UserName
+    $td : header To Domain
+    $tt : headet To parameter tag
+
+    $pn : header P-Preferred-Identity DisplayName
+    $pu : header P-Preferred-Identity URI
+    $pU : header P-Preferred-Identity UserName
+    $pd : header P-Preferred-Identity Domain
+
+    $adu: header Authorization or Proxy-Authorization uri
+    $aa : header Authorization or Proxy-Authorization algorithm
+    $ar : header Authorization or Proxy-Authorization realm
+    $au : header Authorization or Proxy-Authorization user part of username
+    $ad : header Authorization or Proxy-Authorization domain part of username
+    $aU : header Authorization or Proxy-Authorization username
+    $an : header Authorization or Proxy-Authorization nonce
+
+    '$auth.nonce'  : header Authorization or Proxy-Authorization nonce
+    '$auth.resp'   : header Authorization or Proxy-Authorization response
+    '$auth.opaque' : header Authorization or Proxy-Authorization opaque
+    '$auth.alg'    : header Authorization or Proxy-Authorization algorithm
+    '$auth.qop'    : header Authorization or Proxy-Authorization qop
+
+    $ai : header P-Asserted-Identity URI
+
+    $di  : header Diversion URI
+    $dip : header Diversion parameter privacy
+    $dir : header Diversion parametter reason
+
+    $re : header Remote-Party-ID URI
+
+    $rt : header Refer-To URI
+
+    $cs : header CSeq seq
+    
+    $rb : msg body
+    $ua : header User-Agent
+
+    $ci : header Call-ID
+
+    $cl : header Content-Length
+
+    $cT : header Content-Type
+
+    $route_uri: first Route header URI
+
+    $ml : msg length
+    $mt : msg type 1 (request) or 2 (reply)
+
+    '$msg.is_request' : 1 (true) or 0 (false)
+    '$msg.type' : 'request' or 'reply'
+ 
+```
+
+Also we support these special pseudo-variables defined by opensips/kamailio:
+```
+  '$(hdrcnt(HEADER_NAME))' : number of header with that name in the msg
+  '$hdr(HEADER_NAME)' : gets the first header with HEADER_NAME in the msg
+  '$(hdr(HEADER_NAME)[n])' : gets the nth header with name HEADER_NAME in the msg 
+```
+
+As an altenative to simplify specifying headers you can use:
+```
+  hdr_HEADER_NAME
+or
+  hdr_COMPACTNAME
+```
+Ex:
+```
+  assert(msg.hdr_max_forwards == '70')
+  assert(msg.hdr_c == 'application/sdp')
+```
+Obs: you must replace dashes in the header names with underscores.
+
+
+A few pseudo-variables are currently not supported (as I need more details to implement them):
+```
+$auth.nc - the value of nonce count parameter from Authorization or Proxy-Authorization header
+
+$(rb[*]) - same as $rb
+
+$(rb[n]) - the n-th body belonging to a multi-part body from the beginning of message, starting with index 0
+
+$(rb[-n]) - the n-th body belonging to a multi-part body from the end of the message, starting with index -1 (the last contact instance)
+
+$rb(application/sdp) - get the first SDP body part
+
+$(rb(application/isup)[-1]) - get the last ISUP body part
+
+$ru_q - reference to q value of the R-URI
+
+```
+
+Ref:
+
+https://www.kamailio.org/wiki/cookbooks/5.4.x/pseudovariables
+
+https://www.opensips.org/Documentation/Script-CoreVar-3-4

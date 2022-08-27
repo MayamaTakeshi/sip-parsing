@@ -402,6 +402,16 @@ module.exports = {
 
                 var match = null
 
+                if (key.startsWith("hdr_")) {
+                    var name = key.slice(4).replaceAll("_", "-")
+                    if(compact_headers[name]) {
+                        name = compact_headers[name]
+                    }
+
+                    target[key] = get_header(name, target) 
+                    return target[key]
+                }
+
                 var re_hdr = /^\$hdr\(([^\)]+)\)$/
                 match = key.match(re_hdr)
                 if(match) {

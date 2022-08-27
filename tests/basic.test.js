@@ -10,6 +10,7 @@ Call-ID: 9816c895-2655-4587-94fd-63a71b6dbbd5
 CSeq: 33558 REGISTER
 Contact: <sip:alice@10.255.255.199:6061>
 Expires: 0
+P-Home-Nebula: Eagle
 Authorization: Digest username="alice", realm="philolaus", algorithm="MD5-sess" nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", uri="sip:strategy.com", response="3a3095e91d9e8c2dcabef86695efd5"
 Content-Length:  0
 
@@ -45,6 +46,9 @@ Content-Length:  0
     expect(p.$rv).toBe('SIP/2.0')
     expect(p.$rs).toBe(null)
     expect(p.$rr).toBe(null)
+
+    expect(p.hdr_max_FORWARDS).toBe("70")
+    expect(p.hdr_P_home_NeBuLa).toBe("Eagle")
 })
 
 test('INVITE with Proxy-Authorization header', () => {
@@ -187,6 +191,8 @@ l: 142
 	expect(p.$ci).toBe('a84b4c76e66710')
 	expect(p.$cT).toBe('application/sdp')
 	expect(p.$cl).toBe('142')
+    expect(p.hdr_v).toBe('SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1')
+    expect(p.hdr_l).toBe('142')
 })
 
 test('P-Identity headers', () => {
