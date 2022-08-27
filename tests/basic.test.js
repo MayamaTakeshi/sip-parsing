@@ -41,7 +41,6 @@ Content-Length:  0
     expect(p.$rr).toBe(null)
 })
 
-
 test('INVITE with Proxy-Authorization header', () => {
 	var s = `INVITE tel:0011223344@biloxi.com SIP/2.0
 Via: SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1
@@ -175,4 +174,37 @@ l: 142
 	expect(p.$cl).toBe('142')
 })
 
+test('P-Identity headers', () => {
+	var s = `INVITE tel:0011223344@biloxi.com SIP/2.0
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1
+Max-Forwards: 70
+To: Bob <sip:bob@biloxi.com>
+From: Alice <sip:alice@atlanta.com>;tag=1928301774
+Call-ID: a84b4c76e66710
+CSeq: 314159 INVITE
+Contact: <sip:alice@pc33.atlanta.com>
+Content-Type: application/sdp
+P-Asserted-Identity: <sip:12345227101@sip.domain.de;user=phone>
+P-Preferred-Identity: <sip:123452270@sip.domain.de:5060>
+Route: <sip:192.168.2.198;lr;r2=on;ftag=2d20cea8-527ddsf;did=a57.05>
+content-length: 142
+
+v=0
+o=root 123 456 IN IP4 1.2.3.4
+a=rtpmap:0 pcmu/8000
+a=sendrecv`
+
+	s = s.replace(/\n/g, "\r\n")
+
+	var p = sp.parse(s)
+
+    expect(p.$mt).toBe(1)
+    expect(p.$ml).toBe(s.length)
+	expect(p.$rz).toBe("tel")
+	expect(p.$pn).toBe(null)
+	expect(p.$pU).toBe("123452270")
+	expect(p.$pd).toBe("sip.domain.de")
+	expect(p.$pu).toBe("sip:123452270@sip.domain.de:5060")
+	expect(p.$ai).toBe("sip:12345227101@sip.domain.de")
+})
 

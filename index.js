@@ -2,6 +2,10 @@ const compact_headers = require('./compact_headers')
 
 const _ = require('lodash')
 
+const ensure_null = (x) => {
+    return x ? x : null
+}
+
 const parse_request_line = (msg) => {
     var a = msg.first_line.split(/\s+/)
 
@@ -110,43 +114,78 @@ const remove_angle_brackets = uri => {
     return uri
 }
 
+const gen_params = (s) => {
+    return _.chain(s)
+        .split(";")
+        .map(x => { return x.split("=") })
+        .fromPairs()
+        .value()
+}
+
 const parse_displayname_and_uri = (displayname_uri) => {
-    var separation_point = null
-
-    var double_quote_pos = displayname_uri.indexOf('"')
-
-    if(double_quote_pos >= 0) {
-        var closing_double_quote_pos = displayname_uri.indexOf('"', double_quote_pos+1)
-        if(closing_double_quote_pos >= 0) {
-            separation_point = closing_double_quote_pos
-        }
-    }
-
-    if(!separation_point) {
-        var space_pos = displayname_uri.indexOf(" ")
-        if(space_pos >= 0) {
-            separation_point = space_pos
-        } else {
-            var open_bracket_pos = displayname_uri.indexOf("<")
-            if(open_bracket_pos) {
-                separation_point = open_bracket_pos-1
-            }    
-        }    
-    }
+    var start_of_next = 0
 
     var displayname
     var uri
+    var params = {}
+    var uri_params = {}
 
-    if(separation_point > 0) {
-        displayname = displayname_uri.substring(0, separation_point).trim()
-        uri = displayname_uri.substring(separation_point+1).trim()
+    var double_quote_pos = displayname_uri.indexOf('"')
+    if(double_quote_pos >= 0) {
+        var closing_double_quote_pos = displayname_uri.indexOf('"', double_quote_pos+1)
+        if(closing_double_quote_pos >= 0) {
+            displayname = displayname_uri.slice(double_quote_pos+1, closing_double_quote_pos)
+            start_of_next = closing_double_quote_pos+1
+        } else {
+            // malformed
+            return {}
+        }
     } else {
-        displayname = ""
-        uri = displayname_uri.trim()
-    }    
+        // It could be:
+        // From: Alice <sip:alice@atlanta.com>;tag=1928301774
+        var pos = displayname_uri.indexOf('<')
+        if(pos >= 0) {
+            start_of_next = pos
+            displayname = displayname_uri.slice(0, start_of_next).trim()
+        } else  {
+            displayname = null
+        }
+    }
 
-    uri = remove_angle_brackets(uri)
-    return {displayname: displayname, uri: uri}
+    var uri_and_params = displayname_uri.slice(start_of_next).trim()
+    if(uri_and_params[0] == '<') {
+        var end_bracket_pos = uri_and_params.indexOf('>')
+        if(end_bracket_pos >= 0) {
+            uri = uri_and_params.slice(1, end_bracket_pos)
+            var pos = uri.indexOf(";")
+            if(pos >=0 && pos < end_bracket_pos) {
+                // this means we got <sip:user@domain;param1=val1;param2=val2;>
+                // so extract the params
+                uri_params = gen_params(uri.slice(pos+1))
+                uri = uri.slice(0, pos)
+            }
+            pos = uri_and_params.indexOf(";", end_bracket_pos)
+            if(pos >= 0) {
+                // this means we got <sip:user@domain>;param1=val1;param2=val2
+                params = gen_params(uri_and_params.slice(pos+1))
+            }
+        } else {
+            // malformed
+            return {}
+        }
+    } else {
+        start_of_next = uri_and_params.indexOf(";")
+        if(start_of_next >= 0) {
+            uri = uri_and_params.slice(0, start_of_next)
+            params = gen_params(uri_and_params.slice(start_of_next+1))
+        } else {
+            uri = uri_and_params
+        }
+    }
+
+    if(displayname == "") displayname = null
+
+    return {displayname, uri, params: {...params, ...uri_params}}
 }
 
 const parse_scheme_username_domain_port = (uri) => {
@@ -169,22 +208,7 @@ const parse_displayname_uri_username_domain = (header, msg) => {
     var value = get_header(header, msg)
     if(!value) return null
 
-    var params = {}
-
-    var displayname_uri
-    var semi_colon_pos = value.indexOf(";") 
-    if(semi_colon_pos > 0) {
-        displayname_uri = value.substring(0, semi_colon_pos)
-        params = _.chain(value.substring(semi_colon_pos+1))
-            .split(";")
-            .map(x => { return x.split("=") })
-            .fromPairs()
-            .value()
-    } else {
-        displayname_uri = value
-    }
-
-    var du = parse_displayname_and_uri(displayname_uri)
+    var du = parse_displayname_and_uri(value)
     var sudp = parse_scheme_username_domain_port(du.uri)
 
     if(header == 'from') {
@@ -193,7 +217,7 @@ const parse_displayname_uri_username_domain = (header, msg) => {
         msg.$fU = sudp.username
         msg.$fd = sudp.domain
         msg.$fUl = sudp.username.length
-        msg.$ft = params.tag
+        msg.$ft = du.params.tag
     } else if(header == 'to') {
         msg.$tu = du.uri
         msg.$tn = du.displayname
@@ -205,13 +229,13 @@ const parse_displayname_uri_username_domain = (header, msg) => {
         msg.$pU = sudp.username
         msg.$pd = sudp.domain
     } else if(header == 'p-asserted-identity') {
-        msg.$ai = uri
+        msg.$ai = du.uri
     } else if(header == 'diversion') {
-        msg.$di = uri
+        msg.$di = du.uri
     } else if(header == 'remote-party-id') {
-        msg.$re = uri
+        msg.$re = du.uri
     } else if(header == 'refer-to') {
-        msg.$rt = uri
+        msg.$rt = du.uri
     }
 
     return {displayname: du.display_name, uri: du.uri, username: sudp.username, domain: sudp.domain}
@@ -229,10 +253,6 @@ const parse_cseq = (msg) => {
     if(!msg.$rm) {
         msg.$rm = cseq[1]
     }
-}
-
-const ensure_null = (x) => {
-    return x ? x : null
 }
 
 const parse_authorization_or_proxy_authorization = (msg) => {
@@ -408,5 +428,7 @@ module.exports = {
 
         return o
     },
+
+    parse_displayname_and_uri,
 }
 
