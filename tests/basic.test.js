@@ -53,12 +53,12 @@ Content-Length:  0
 })
 
 test('INVITE with Proxy-Authorization header', () => {
-	var s = `INVITE tel:0011223344@biloxi.com SIP/2.0
+	var s = `INVITE tel:0011223344@biloxi.com;carrierid=1234;cacode=1 SIP/2.0
 Via: SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1
 Max-Forwards: 70
 To: Bob <sip:bob@biloxi.com>
-From: Alice <sip:alice@atlanta.com>;tag=1928301774
+From: Alice <sip:alice@atlanta.com;color=blue>;tag=1928301774
 Call-ID: a84b4c76e66710
 CSeq: 314159 INVITE
 USER-AGENT: SomeUA 123.0
@@ -67,7 +67,7 @@ Content-Type: application/sdp
 Proxy-Authorization: Digest username="alice@atlanta.com", realm="trapezoid", algorithm="MD5", opaque="someopaque", qop="someqop", nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", uri="sip:0011223344@biloxi.com", response="3a3095e91d9e8c2dcabef86695efd5"
 Route: <sip:192.168.2.198:9060;lr;r2=on;ftag=2d20cea8;did=a57.05>
 Route: <sip:192.168.2.198;lr;r2=on;ftag=2d20cea8-527ddsf;did=a57.05>
-Diversion: sip:11223344@test.com;reason=user-busy;counter=1;privacy=full
+Diversion: <sip:11223344@test.com>;reason=user-busy;counter=1;privacy=full
 cONTENT-lENGTH: 142
 
 v=0
@@ -83,8 +83,8 @@ a=sendrecv`
     expect(p.$ml).toBe(s.length)
 	expect(p.$rz).toBe("tel")
 	expect(p.$rU).toBe("0011223344")
-	expect(p.$ru).toBe("tel:0011223344@biloxi.com")
-	expect(p['$hdr(From)']).toBe('Alice <sip:alice@atlanta.com>;tag=1928301774')
+	expect(p.$ru).toBe("tel:0011223344@biloxi.com;carrierid=1234;cacode=1")
+	expect(p['$hdr(From)']).toBe('Alice <sip:alice@atlanta.com;color=blue>;tag=1928301774')
 	expect(p['$(hdrcnt(Via))']).toBe(2)
 	expect(p['$hdr(v)']).toBe('SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1')
 	expect(p['$(hdr(v)[0])']).toBe('SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1')
@@ -228,7 +228,7 @@ a=sendrecv`
 	expect(p.$pU).toBe("123452270")
 	expect(p.$pd).toBe("sip.domain.de")
 	expect(p.$pu).toBe("sip:123452270@sip.domain.de:5060")
-	expect(p.$ai).toBe("sip:12345227101@sip.domain.de")
+	expect(p.$ai).toBe("sip:12345227101@sip.domain.de;user=phone")
     expect(p.$di).toBe('sip:11223344@test.com')
     expect(p.$dip).toBe('full')
     expect(p.$dir).toBe('user-busy')

@@ -7,17 +7,27 @@ test('parse_displayname_and_uri', () => {
         params: {},
     })
 
-    expect(sp.parse_displayname_and_uri('sip:fluffy@cisco.com;color=black')).toStrictEqual({
+    expect(sp.parse_displayname_and_uri('sip:fluffy@cisco.com;carrierid=1234')).toStrictEqual({
         displayname: undefined,
-        uri: 'sip:fluffy@cisco.com',
-        params: {
-            color: 'black',
-        },
+        uri: 'sip:fluffy@cisco.com;carrierid=1234',
+        params: {},
+    })
+
+    expect(sp.parse_displayname_and_uri('sip:fluffy@cisco.com;carrierid=1234;cacode=1')).toStrictEqual({
+        displayname: undefined,
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
+        params: {},
     })
 
     expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com>')).toStrictEqual({
         displayname: undefined,
         uri: 'sip:fluffy@cisco.com',
+        params: {},
+    })
+
+    expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com;carrierid=1234;cacode=1>')).toStrictEqual({
+        displayname: undefined,
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
         params: {},
     })
 
@@ -29,44 +39,72 @@ test('parse_displayname_and_uri', () => {
         },
     })
 
+    expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com;cacode=1234>;origin=secret')).toStrictEqual({
+        displayname: undefined,
+        uri: 'sip:fluffy@cisco.com;cacode=1234',
+        params: {
+            origin: 'secret',
+        },
+    })
+
+    expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com;carrierid=1234;cacode=1>;origin=secret')).toStrictEqual({
+        displayname: undefined,
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
+        params: {
+            origin: 'secret',
+        },
+    })
+
     expect(sp.parse_displayname_and_uri('"Cullen Jennings" <sip:fluffy@cisco.com>')).toStrictEqual({
         displayname: "Cullen Jennings",
         uri: 'sip:fluffy@cisco.com',
         params: {},
     })
 
-    expect(sp.parse_displayname_and_uri('<sip:12345227101@sip.domain.de;user=phone>')).toStrictEqual({
-        displayname: undefined,
-        uri: 'sip:12345227101@sip.domain.de',
-        params: {user: 'phone'},
+    expect(sp.parse_displayname_and_uri('"Cullen Jennings" <sip:fluffy@cisco.com;carrierid=1234>')).toStrictEqual({
+        displayname: "Cullen Jennings",
+        uri: 'sip:fluffy@cisco.com;carrierid=1234',
+        params: {},
     })
 
-    expect(sp.parse_displayname_and_uri('Mickey <sip:123123@disney.com;origin=fantasia;color=red>')).toStrictEqual({
+    expect(sp.parse_displayname_and_uri('"Cullen Jennings" <sip:fluffy@cisco.com;carrierid=1234;cacode=1>')).toStrictEqual({
+        displayname: "Cullen Jennings",
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
+        params: {},
+    })
+
+    expect(sp.parse_displayname_and_uri('"Cullen Jennings" <sip:fluffy@cisco.com;carrierid=1234;cacode=1>;origin=secret')).toStrictEqual({
+        displayname: "Cullen Jennings",
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
+        params: {
+            origin: 'secret'
+        },
+    })
+
+    expect(sp.parse_displayname_and_uri('"Cullen Jennings" <sip:fluffy@cisco.com;carrierid=1234;cacode=1>;origin=secret;color=blue')).toStrictEqual({
+        displayname: "Cullen Jennings",
+        uri: 'sip:fluffy@cisco.com;carrierid=1234;cacode=1',
+        params: {
+            origin: 'secret',
+            color: 'blue',
+        },
+    })
+
+    expect(sp.parse_displayname_and_uri('Mickey <sip:123123@disney.com;carrierid=1234;cacode=1>;origin=fantasia;color=red')).toStrictEqual({
         displayname: "Mickey" ,
-        uri: 'sip:123123@disney.com',
+        uri: 'sip:123123@disney.com;carrierid=1234;cacode=1',
         params: {
             origin: 'fantasia',
             color: 'red',
         },
     })
 
-    expect(sp.parse_displayname_and_uri('Goofy<sip:123123@disney.com;origin=fault;color=blue>')).toStrictEqual({
-        displayname: "Goofy" ,
-        uri: 'sip:123123@disney.com',
+    expect(sp.parse_displayname_and_uri('Zod<sip:123123@dc.com;carrierid=1234;cacode=1>;origin=negative-zone;color=blue')).toStrictEqual({
+        displayname: "Zod" ,
+        uri: 'sip:123123@dc.com;carrierid=1234;cacode=1',
         params: {
-            origin: 'fault',
+            origin: 'negative-zone',
             color: 'blue',
-        },
-    })
-
-    expect(sp.parse_displayname_and_uri('Minnie<sip:123123@disney.com;origin=shadow;color=green>;location=secret;team=apricot')).toStrictEqual({
-        displayname: "Minnie" ,
-        uri: 'sip:123123@disney.com',
-        params: {
-            origin: 'shadow',
-            color: 'green',
-            location: 'secret',
-            team: 'apricot',
         },
     })
 })

@@ -124,7 +124,6 @@ const parse_displayname_and_uri = (displayname_uri) => {
     var displayname
     var uri
     var params = {}
-    var uri_params = {}
 
     var double_quote_pos = displayname_uri.indexOf('"')
     if(double_quote_pos >= 0) {
@@ -138,11 +137,13 @@ const parse_displayname_and_uri = (displayname_uri) => {
         }
     } else {
         // It could be:
+        // From: <sip:alice@atlanta.com>;tag=1928301774
+        // or
         // From: Alice <sip:alice@atlanta.com>;tag=1928301774
         var pos = displayname_uri.indexOf('<')
         if(pos >= 0) {
+            displayname = displayname_uri.slice(0, pos).trim()
             start_of_next = pos
-            displayname = displayname_uri.slice(0, start_of_next).trim()
         } else  {
             displayname = undefined
         }
@@ -153,35 +154,28 @@ const parse_displayname_and_uri = (displayname_uri) => {
         var end_bracket_pos = uri_and_params.indexOf('>')
         if(end_bracket_pos >= 0) {
             uri = uri_and_params.slice(1, end_bracket_pos)
-            var pos = uri.indexOf(";")
-            if(pos >=0 && pos < end_bracket_pos) {
-                // this means we got <sip:user@domain;param1=val1;param2=val2;>
-                // so extract the params
-                uri_params = gen_params(uri.slice(pos+1))
-                uri = uri.slice(0, pos)
-            }
-            pos = uri_and_params.indexOf(";", end_bracket_pos)
+            var pos = uri_and_params.indexOf(';', end_bracket_pos)
             if(pos >= 0) {
-                // this means we got <sip:user@domain>;param1=val1;param2=val2
-                params = gen_params(uri_and_params.slice(pos+1))
+                start_of_next = pos + 1
+            } else {
+                start_of_next = -1
             }
         } else {
             // malformed
             return {}
         }
     } else {
-        start_of_next = uri_and_params.indexOf(";")
-        if(start_of_next >= 0) {
-            uri = uri_and_params.slice(0, start_of_next)
-            params = gen_params(uri_and_params.slice(start_of_next+1))
-        } else {
-            uri = uri_and_params
-        }
+        uri = uri_and_params
+        start_of_next = -1
+    }
+
+    if(start_of_next >= 0) {
+        params = gen_params(uri_and_params.slice(start_of_next))
     }
 
     if(displayname == "") displayname = undefined
 
-    return {displayname, uri, params: {...params, ...uri_params}}
+    return {displayname, uri, params}
 }
 
 const parse_scheme_username_domain_port = (uri) => {
