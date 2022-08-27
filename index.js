@@ -36,8 +36,8 @@ const parse_status_line = (msg) => {
 const basic_parse = (msg) => {
     msg.is_request = !msg.str.startsWith('SIP/')
     msg.$ml = msg.str.length
-    msg.['$msg.is_request'] = msg.is_request ? 1 : 0
-    msg.['$msg.type'] = msg.is_request ? 'request' : 'reply'
+    msg['$msg.is_request'] = msg.is_request ? 1 : 0
+    msg['$msg.type'] = msg.is_request ? 'request' : 'reply'
 
     var a = msg.str.split("\r\n\r\n")
 
