@@ -2,13 +2,13 @@ const sp = require('../index.js')
 
 test('parse_displayname_and_uri', () => {
     expect(sp.parse_displayname_and_uri('sip:fluffy@cisco.com')).toStrictEqual({
-        displayname: null,
+        displayname: undefined,
         uri: 'sip:fluffy@cisco.com',
         params: {},
     })
 
     expect(sp.parse_displayname_and_uri('sip:fluffy@cisco.com;color=black')).toStrictEqual({
-        displayname: null,
+        displayname: undefined,
         uri: 'sip:fluffy@cisco.com',
         params: {
             color: 'black',
@@ -16,13 +16,13 @@ test('parse_displayname_and_uri', () => {
     })
 
     expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com>')).toStrictEqual({
-        displayname: null,
+        displayname: undefined,
         uri: 'sip:fluffy@cisco.com',
         params: {},
     })
 
     expect(sp.parse_displayname_and_uri('<sip:fluffy@cisco.com>;origin=secret')).toStrictEqual({
-        displayname: null,
+        displayname: undefined,
         uri: 'sip:fluffy@cisco.com',
         params: {
             origin: 'secret',
@@ -36,7 +36,7 @@ test('parse_displayname_and_uri', () => {
     })
 
     expect(sp.parse_displayname_and_uri('<sip:12345227101@sip.domain.de;user=phone>')).toStrictEqual({
-        displayname: null ,
+        displayname: undefined,
         uri: 'sip:12345227101@sip.domain.de',
         params: {user: 'phone'},
     })

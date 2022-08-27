@@ -2,10 +2,6 @@ const compact_headers = require('./compact_headers')
 
 const _ = require('lodash')
 
-const ensure_null = (x) => {
-    return x ? x : null
-}
-
 const parse_request_line = (msg) => {
     var a = msg.first_line.split(/\s+/)
 
@@ -41,9 +37,7 @@ const basic_parse = (msg) => {
 
     var a = msg.str.split("\r\n\r\n")
 
-    if(a[1] == "") {
-        msg.body = null
-    } else {
+    if(a[1] != "") {
         msg.body = a[1]
     }
 
@@ -79,7 +73,7 @@ const get_header = (name, msg) => {
 
     if(item) return item[1]
 
-    return null
+    return undefined;
 }
 
 const get_header_by_index = (name, index, msg) => {
@@ -87,9 +81,9 @@ const get_header_by_index = (name, index, msg) => {
         return name.toLowerCase() == name_value[0]
     })
 
-    if(items.length == 0) return null
+    if(items.length == 0) return undefined;
 
-    var item = null
+    var item = undefined;
     
     if(index == '-1') {
         item = items[items.length -1]
@@ -106,7 +100,7 @@ const get_header_by_index = (name, index, msg) => {
         }
     }    
 
-    return null
+    return undefined;
 }
 
 const remove_angle_brackets = uri => {
@@ -150,7 +144,7 @@ const parse_displayname_and_uri = (displayname_uri) => {
             start_of_next = pos
             displayname = displayname_uri.slice(0, start_of_next).trim()
         } else  {
-            displayname = null
+            displayname = undefined
         }
     }
 
@@ -185,7 +179,7 @@ const parse_displayname_and_uri = (displayname_uri) => {
         }
     }
 
-    if(displayname == "") displayname = null
+    if(displayname == "") displayname = undefined
 
     return {displayname, uri, params: {...params, ...uri_params}}
 }
@@ -208,7 +202,7 @@ const parse_scheme_username_domain_port = (uri) => {
 
 const parse_displayname_uri_username_domain = (header, msg) => {
     var value = get_header(header, msg)
-    if(!value) return null
+    if(!value) return undefined
 
     var du = parse_displayname_and_uri(value)
     var sudp = parse_scheme_username_domain_port(du.uri)
@@ -248,7 +242,7 @@ const parse_displayname_uri_username_domain = (header, msg) => {
 
 const parse_cseq = (msg) => {
     var cseq = get_header('cseq', msg)
-    if(!cseq) return null
+    if(!cseq) return undefined
 
     cseq = cseq.trim().split(/\W+/)
 
@@ -273,7 +267,7 @@ const parse_authorization_or_proxy_authorization = (msg) => {
             .drop(1) // drop the first token (like 'Digest')
             .map(x => { return x.replace(/,$/,'') } ) //remove comma at the end of tokens
             .map(x => { return x.split("=") } ) // generate key/value pairs
-            .map(x => { return [x[0], x[1] ? x[1].replace(/^"|"$/g, '') : null] }) // remove double quotes from values
+            .map(x => { return [x[0], x[1] ? x[1].replace(/^"|"$/g, '') : undefined] }) // remove double quotes from values
             .fromPairs() // covert key/value pairs to object
             .value()
     } else {
@@ -282,18 +276,18 @@ const parse_authorization_or_proxy_authorization = (msg) => {
 
     var user_and_domain = msg.auth.username ? msg.auth.username.split('@') : []
 
-    msg.$adu = ensure_null(msg.auth.uri)
-    msg.$aa  = ensure_null(msg.auth.algorithm)
-    msg.$ar  = ensure_null(msg.auth.realm)
-    msg.$au  = ensure_null(user_and_domain[0])
-    msg.$ad  = ensure_null(user_and_domain[1])
-    msg.$aU  = ensure_null(msg.auth.username)
-    msg.$an  = ensure_null(msg.auth.nonce)
+    msg.$adu = msg.auth.uri
+    msg.$aa  = msg.auth.algorithm
+    msg.$ar  = msg.auth.realm
+    msg.$au  = user_and_domain[0]
+    msg.$ad  = user_and_domain[1]
+    msg.$aU  = msg.auth.username
+    msg.$an  = msg.auth.nonce
     msg['$auth.nonce'] = msg.$an
-    msg['$auth.resp'] = ensure_null(msg.auth.response)
-    msg['$auth.opaque'] = ensure_null(msg.auth.opaque)
+    msg['$auth.resp'] = msg.auth.response
+    msg['$auth.opaque'] = msg.auth.opaque
     msg['$auth.alg'] = msg.$aa
-    msg['$auth.qop'] = ensure_null(msg.auth.qop)
+    msg['$auth.qop'] = msg.auth.qop
 }
 
 
@@ -400,7 +394,7 @@ module.exports = {
 
                 var key = key.toString()
 
-                var match = null
+                var match = undefined
 
                 if (key.startsWith("hdr_")) {
                     var name = key.slice(4).replaceAll("_", "-")
@@ -453,7 +447,7 @@ module.exports = {
                     return target[key]
                 }
 
-                return null
+                return undefined
             },
         })
 
