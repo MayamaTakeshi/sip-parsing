@@ -120,6 +120,8 @@ Also we support these special pseudo-variables defined by kamailio/opensips:
   '$(hdr(HEADER_NAME)[n])' : gets the nth header with name HEADER_NAME in the msg 
 ```
 
+The case (upper/lower) of header names are irrelevant and you can specify them by their [compact format](https://github.com/MayamaTakeshi/sip-parsing/blob/master/compact_headers.js)
+
 As an altenative to simplify specifying headers you can use:
 ```
   hdr_HEADER_NAME

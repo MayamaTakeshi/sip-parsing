@@ -99,11 +99,11 @@ test('parse_displayname_and_uri', () => {
         },
     })
 
-    expect(sp.parse_displayname_and_uri('Zod<sip:123123@dc.com;carrierid=1234;cacode=1>;origin=negative-zone;color=blue')).toStrictEqual({
+    expect(sp.parse_displayname_and_uri('Zod<sip:123123@dc.com;carrierid=1234;cacode=1>;origin=phantom-zone;color=blue')).toStrictEqual({
         displayname: "Zod" ,
         uri: 'sip:123123@dc.com;carrierid=1234;cacode=1',
         params: {
-            origin: 'negative-zone',
+            origin: 'phantom-zone',
             color: 'blue',
         },
     })
