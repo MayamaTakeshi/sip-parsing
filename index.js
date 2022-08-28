@@ -451,5 +451,7 @@ module.exports = {
     },
 
     parse_displayname_and_uri,
+
+    compact_headers,
 }
 
