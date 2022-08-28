@@ -11,7 +11,7 @@ CSeq: 33558 REGISTER
 Contact: <sip:alice@10.255.255.199:6061>
 Expires: 0
 P-Home-Nebula: Eagle
-Authorization: Digest username="alice", realm="philolaus", algorithm="MD5-sess" nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", nc=00000001, uri="sip:strategy.com", response="3a3095e91d9e8c2dcabef86695efd5"
+Authorization: Digest username="alice", realm="philolaus", algorithm="MD5-sess", nonce="YwlawmMJWZYy5SvWK0BKihxsDkQusC+y", nc=00000001, uri="sip:strategy.com", response="3a3095e91d9e8c2dcabef86695efd5"
 Content-Length:  0
 
 `
