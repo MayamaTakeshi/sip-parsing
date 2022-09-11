@@ -57,7 +57,7 @@ test('INVITE with Proxy-Authorization header', () => {
 Via: SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8;received=192.0.2.1
 Max-Forwards: 70
-To: Bob <sip:bob@biloxi.com>
+To: Bob <sip:bob@biloxi.com;param1=abc>
 From: Alice <sip:alice@atlanta.com;color=blue>;tag=1928301774
 Call-ID: a84b4c76e66710
 CSeq: 314159 INVITE
@@ -84,6 +84,7 @@ a=sendrecv`
     expect(p.$rz).toBe("tel")
     expect(p.$rU).toBe("0011223344")
     expect(p.$ru).toBe("tel:0011223344@biloxi.com;carrierid=1234;cacode=1")
+    expect(p.$td).toBe("biloxi.com")
     expect(p['$hdr(From)']).toBe('Alice <sip:alice@atlanta.com;color=blue>;tag=1928301774')
     expect(p['$(hdrcnt(Via))']).toBe(2)
     expect(p['$hdr(v)']).toBe('SIP/2.0/UDP bigbox3.site3.atlanta.com;branch=z9hG4bK77ef4c2312983.1')

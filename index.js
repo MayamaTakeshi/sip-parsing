@@ -179,6 +179,11 @@ const parse_displayname_and_uri = (displayname_uri) => {
 }
 
 const parse_scheme_username_domain_port = (uri) => {
+    var semicolon_pos = uri.indexOf(";")
+    if(semicolon_pos >= 0){ 
+        uri = uri.slice(0, semicolon_pos)
+    }
+
     var colon_pos = uri.indexOf(":")
     var at_pos = uri.indexOf('@')
 
