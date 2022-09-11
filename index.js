@@ -398,7 +398,7 @@ module.exports = {
                 var match = undefined
 
                 if (key.startsWith("hdr_")) {
-                    var name = key.slice(4).replaceAll("_", "-")
+                    var name = key.slice(4).replace(/_/g, "-")
                     if(compact_headers[name]) {
                         name = compact_headers[name]
                     }
