@@ -30,6 +30,7 @@ Content-Length:  0
     expect(p['$hdr(v)']).toBe('SIP/2.0/UDP 10.255.255.199:6061;rport;branch=z9hG4bKPjb169c16c-892f-4680-93a6-f4adb80bb477')
     expect(p.$cs).toBe(33558)
     expect(p.$cl).toBe('0')
+    expect(p.$ct).toBe('<sip:alice@10.255.255.199:6061>')
     expect(p.$rb).toBe(undefined)
     expect(p.$adu).toBe('sip:strategy.com')
     expect(p.$aa).toBe("MD5-sess")

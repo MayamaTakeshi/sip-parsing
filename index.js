@@ -369,6 +369,8 @@ const base_pseudovar_accessors = {
 
     $cl: (msg) => { return get_header('content-length', msg) },
 
+    $ct: (msg) => { return get_header('contact', msg) },
+
     $cT: (msg) => { return get_header('content-type', msg) },
 
     $route_uri: (msg) => { return remove_angle_brackets(get_header('route', msg)) },
