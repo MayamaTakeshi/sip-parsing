@@ -46,7 +46,10 @@ assert(msg.$rb == 'v=0\r\no=root 123 456 IN IP4 1.2.3.4\r\na=rtpmap:0 pcmu/8000\
 Here is the full list of supported pseudo-variables:
 
 ```
-    $rm : request method ('INVITE', 'ACK', 'BYE' etc)
+    $rm  : request method ('INVITE', 'ACK', 'BYE' etc)
+
+    $rs  : reply status
+    $rr  : reply reason
 
     $fn  : header From DisplayName
     $fu  : header From URI
